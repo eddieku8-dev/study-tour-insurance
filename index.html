@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>遊學團旅平險｜LIFF 測試</title>
+  <script src="https://static.line-scdn.net/liff/edge/versions/2.30.0/sdk.js"></script>
+  <style>
+    body{font-family:Arial,"Noto Sans TC",sans-serif;background:#f5f7fa;margin:0;color:#202124}
+    .wrap{max-width:620px;margin:auto;padding:24px}
+    .card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 18px rgba(0,0,0,.06)}
+    h1{font-size:24px;margin-top:0}
+    .row{padding:9px 0;border-bottom:1px solid #eee;line-height:1.5}
+    .row:last-child{border-bottom:0}
+    .ok{color:#137333}.bad{color:#c5221f}.warn{color:#b06000}
+    button{width:100%;margin-top:16px;padding:13px;border:0;border-radius:10px;background:#111;color:#fff;font-size:16px}
+    code{word-break:break-all;font-size:12px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>🌏 遊學團旅平險</h1>
+    <p>LINE LIFF 連線測試</p>
+    <div id="status">
+      <div class="row">正在初始化…</div>
+    </div>
+    <button id="loginBtn" style="display:none" onclick="login()">使用 LINE 登入</button>
+  </div>
+</div>
+
+<script>
+const LIFF_ID = "2011319653-aVI0Ar9E";
+
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function render(rows){
+  document.getElementById("status").innerHTML = rows.map(r =>
+    `<div class="row ${r.cls || ""}">${r.text}</div>`
+  ).join("");
+}
+
+function timeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT_"+ms+"MS")), ms))
+  ]);
+}
+
+async function start(){
+  const rows = [];
+  rows.push({text:`LIFF SDK：${typeof liff !== "undefined" ? "✅ 已載入" : "❌ 未載入"}`,
+             cls:typeof liff !== "undefined" ? "ok":"bad"});
+  rows.push({text:`LIFF ID：${esc(LIFF_ID)}`});
+  rows.push({text:`目前網址：<code>${esc(location.href)}</code>`});
+  render(rows);
+
+  if(typeof liff === "undefined") return;
+
+  try{
+    await timeout(liff.init({liffId:LIFF_ID}), 10000);
+
+    rows.push({text:"liff.init()：✅ 成功",cls:"ok"});
+    rows.push({text:`LINE 內開啟：${liff.isInClient() ? "✅ 是" : "⚠️ 否"}`,
+               cls:liff.isInClient() ? "ok":"warn"});
+    rows.push({text:`LINE 登入：${liff.isLoggedIn() ? "✅ 已登入" : "⚠️ 尚未登入"}`,
+               cls:liff.isLoggedIn() ? "ok":"warn"});
+
+    if(!liff.isLoggedIn()){
+      document.getElementById("loginBtn").style.display="block";
+      render(rows);
+      return;
+    }
+
+    const token = liff.getIDToken();
+    rows.push({text:`ID Token：${token ? "✅ 已取得" : "❌ 空白"}`,
+               cls:token ? "ok":"bad"});
+
+    try{
+      const profile = await liff.getProfile();
+      rows.push({text:`LINE 顯示名稱：${esc(profile.displayName || "")}`});
+    }catch(e){
+      rows.push({text:`Profile：⚠️ ${esc(e.message || e)}`,cls:"warn"});
+    }
+
+    render(rows);
+  }catch(e){
+    rows.push({text:`liff.init()：❌ 失敗`,cls:"bad"});
+    rows.push({text:`錯誤：<code>${esc(e.message || e)}</code>`,cls:"bad"});
+    render(rows);
+  }
+}
+
+function login(){
+  liff.login({redirectUri:location.href});
+}
+
+window.addEventListener("load", start);
+</script>
+</body>
+</html>
