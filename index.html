@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>遊學團旅平險｜投保資料</title>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.30.0/sdk.js"></script>
 <style>
@@ -27,7 +30,7 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 </head>
 <body>
 <div class="wrap">
-<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫</p></div>
+<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫｜v7.2</p></div>
 
 <div class="card"><h2>LINE 連線</h2><div id="lineStatus">正在確認 LINE 身分…</div></div>
 
@@ -115,6 +118,7 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 
 <script>
 const LIFF_ID = "2011319653-aVI0Ar9E";
+const BUILD_VERSION = "v7.2-line-safe";
 
 /* ★ 換成你的 Apps Script /exec 網址 */
 const API_URL = "https://script.google.com/macros/s/AKfycbxzRfLG6HS_2exhi9v43gxOvVmIjYR8y59c4ptmXup7XyNOT_lnrWZPuDGlyZJ6bmfXuw/exec";
@@ -123,7 +127,31 @@ let idToken = "";
 let travelerSeq = 0;
 const relations = ["本人","父母","子女","兄弟姊妹","其他"];
 
-function val(id){return document.getElementById(id).value.trim()}
+function getEl(id){
+  const el=document.getElementById(id);
+  if(!el){
+    throw new Error("找不到欄位："+id+"｜版本："+BUILD_VERSION);
+  }
+  return el;
+}
+
+function val(id){
+  const el=getEl(id);
+  return String(el.value??"").trim();
+}
+
+function q(el,selector,label){
+  const found=el.querySelector(selector);
+  if(!found){
+    throw new Error("找不到旅客欄位："+label+" ("+selector+")｜版本："+BUILD_VERSION);
+  }
+  return found;
+}
+
+function qval(el,selector,label){
+  const found=q(el,selector,label);
+  return String(found.value??"").trim();
+}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
 async function initLiff(){
@@ -136,24 +164,30 @@ async function initLiff(){
 
     idToken=liff.getIDToken()||"";
 
-    document.getElementById("lineStatus").innerHTML=idToken
-      ?'<span class="ok">✅ LINE 已連線，可以送出資料</span>'
-      :'<span class="bad">❌ 無法取得 LINE ID Token</span>';
+    const os=(typeof liff!=="undefined" && liff.getOS)?liff.getOS():"unknown";
+    getEl("lineStatus").innerHTML=idToken
+      ?'<span class="ok">✅ LINE 已連線，可以送出資料</span><br><span class="note">版本：'+BUILD_VERSION+'｜OS：'+esc(os)+'</span>'
+      :'<span class="bad">❌ 無法取得 LINE ID Token</span><br><span class="note">版本：'+BUILD_VERSION+'</span>';
 
   }catch(e){
-    document.getElementById("lineStatus").innerHTML=
-      '<span class="bad">❌ '+esc(e.message||e)+'</span>';
+    const statusEl=document.getElementById("lineStatus");
+    if(statusEl){
+      statusEl.innerHTML=
+        '<span class="bad">❌ '+esc(e.message||e)+'</span><br><span class="note">版本：'+BUILD_VERSION+'</span>';
+    }else{
+      alert("LIFF 錯誤："+(e.message||e)+"｜版本："+BUILD_VERSION);
+    }
   }
 }
 
 function toggleCustomAmount(){
-  document.getElementById("customAmountBox")
+  getEl("customAmountBox")
     .classList.toggle("hidden",val("travelPlan")!=="其他");
 }
 
 function renderInconvenience(){
   const i=val("insurer");
-  const a=document.getElementById("inconvenienceArea");
+  const a=getEl("inconvenienceArea");
 
   if(i==="安達產險"){
     a.innerHTML=radios(["超值型","尊榮型","不附加不便險"]);
@@ -268,7 +302,7 @@ function addTraveler(fromApplicant=false){
     </div>
   </div>`;
 
-  document.getElementById("travelers").appendChild(el);
+  getEl("travelers").appendChild(el);
 
   const tr=el.querySelector(".t-rel");
   const same=el.querySelector(".t-same");
@@ -305,13 +339,15 @@ function removeTraveler(n){
 }
 
 function fillTraveler(el){
-  if(!el)return;
+  if(!el){
+    throw new Error("找不到第一位旅客區塊｜版本："+BUILD_VERSION);
+  }
 
-  el.querySelector(".t-name").value=val("applicantName");
-  el.querySelector(".t-id").value=val("applicantId");
-  el.querySelector(".t-birth").value=val("applicantBirth");
-  el.querySelector(".t-rel").value="本人";
-  el.querySelector(".t-rel-other-box").classList.add("hidden");
+  q(el,".t-name","旅客姓名").value=val("applicantName");
+  q(el,".t-id","旅客身分證").value=val("applicantId");
+  q(el,".t-birth","旅客生日").value=val("applicantBirth");
+  q(el,".t-rel","旅客關係").value="本人";
+  q(el,".t-rel-other-box","旅客其他關係區塊").classList.add("hidden");
 }
 
 function syncApplicantTraveler(){
@@ -331,40 +367,41 @@ function syncApplicantTraveler(){
 }
 
 function travelers(){
-  return [...document.querySelectorAll(".traveler")].map(el=>{
-    const relation=el.querySelector(".t-rel").value;
-    const same=el.querySelector(".t-same").value==="true";
-    const bt=el.querySelector(".t-btype").value;
-    const br=el.querySelector(".b-rel").value;
+  return [...document.querySelectorAll(".traveler")].map((el,index)=>{
+    const label="旅客 "+(index+1);
+    const relation=qval(el,".t-rel",label+" 關係");
+    const same=qval(el,".t-same",label+" 是否同行程")==="true";
+    const bt=qval(el,".t-btype",label+" 受益人類型");
+    const br=qval(el,".b-rel",label+" 受益人關係");
 
     return{
-      name:el.querySelector(".t-name").value.trim(),
-      idNumber:el.querySelector(".t-id").value.trim(),
-      birthDate:el.querySelector(".t-birth").value,
+      name:qval(el,".t-name",label+" 姓名"),
+      idNumber:qval(el,".t-id",label+" 身分證"),
+      birthDate:qval(el,".t-birth",label+" 生日"),
       relation,
       relationOther:
         relation==="其他"
-          ?el.querySelector(".t-rel-other").value.trim()
+          ?qval(el,".t-rel-other",label+" 其他關係")
           :"",
       departDate:
         same
           ?val("departDateTime")
-          :el.querySelector(".t-depart").value,
+          :qval(el,".t-depart",label+" 班機去程時間"),
       returnDate:
         same
           ?val("returnDateTime")
-          :el.querySelector(".t-return").value,
+          :qval(el,".t-return",label+" 班機回程時間"),
       underGuardianship:
-        el.querySelector(".t-guard").value==="true",
+        qval(el,".t-guard",label+" 監護宣告")==="true",
       beneficiary:{
         type:bt,
         name:
           bt==="指定受益人"
-            ?el.querySelector(".b-name").value.trim()
+            ?qval(el,".b-name",label+" 受益人姓名")
             :"",
         idNumber:
           bt==="指定受益人"
-            ?el.querySelector(".b-id").value.trim()
+            ?qval(el,".b-id",label+" 受益人身分證")
             :"",
         relation:
           bt==="指定受益人"
@@ -372,7 +409,7 @@ function travelers(){
             :"",
         relationOther:
           bt==="指定受益人"&&br==="其他"
-            ?el.querySelector(".b-rel-other").value.trim()
+            ?qval(el,".b-rel-other",label+" 受益人其他關係")
             :""
       }
     };
@@ -401,7 +438,7 @@ function calculateTravelDays(){
 }
 
 function updateTravelDays(){
-  const display=document.getElementById("travelDaysDisplay");
+  const display=getEl("travelDaysDisplay");
   const days=calculateTravelDays();
   display.value=days ? `${days} 天` : "";
 
@@ -576,7 +613,7 @@ function validate(d){
 
 
 function submitApplication(){
-  const btn=document.getElementById("submitBtn");
+  const btn=getEl("submitBtn");
 
   try{
     if(API_URL.includes("PASTE_YOUR_")){
@@ -601,10 +638,10 @@ function submitApplication(){
     btn.disabled=true;
     btn.textContent="正在送出…";
 
-    document.getElementById("payload").value=
+    getEl("payload").value=
       JSON.stringify(d);
 
-    const f=document.getElementById("postForm");
+    const f=getEl("postForm");
     f.action=API_URL;
     f.submit();
 
@@ -614,6 +651,19 @@ function submitApplication(){
     alert(e.message||e);
   }
 }
+
+
+window.addEventListener("error",(event)=>{
+  const msg=event?.error?.message || event?.message || "未知 JavaScript 錯誤";
+  console.error("Global JS error",event);
+  alert("系統錯誤："+msg+"\n版本："+BUILD_VERSION);
+});
+
+window.addEventListener("unhandledrejection",(event)=>{
+  const reason=event?.reason?.message || event?.reason || "未知 Promise 錯誤";
+  console.error("Unhandled rejection",event);
+  alert("系統錯誤："+reason+"\n版本："+BUILD_VERSION);
+});
 
 window.addEventListener("load",()=>{
   addTraveler(true);
