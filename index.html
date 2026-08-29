@@ -68,11 +68,12 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 
 <div class="card">
 <div class="step">STEP 4</div><h2>旅遊資料</h2>
-<label>出發國家 *</label><input id="country">
+<label>旅遊國家 *</label><input id="country">
 <div class="grid2">
-<div><label>出發日期 *</label><input id="departDate" type="date"></div>
+<div><label>去程日期 *</label><input id="departDate" type="date"></div>
 <div><label>回程日期 *</label><input id="returnDate" type="date"></div>
 </div>
+<p class="note">※ 依投保時間限制，去程日期須距離填寫報價資料時間至少 144 小時。<br><strong id="minDepartureHint"></strong></p>
 <label>要保人是否也是被保險人／同行旅客？ *</label>
 <select id="applicantIsTraveler" onchange="syncApplicantTraveler()">
 <option value="true">是</option>
@@ -217,7 +218,7 @@ function addTraveler(fromApplicant=false){
   <div class="t-date-box hidden">
     <div class="grid2">
       <div>
-        <label>個人出發日期 *</label>
+        <label>個人去程日期 *</label>
         <input class="t-depart" type="date">
       </div>
       <div>
@@ -398,7 +399,7 @@ function buildData(){
       email:val("applicantEmail")
     },
     trip:{
-      destinationCountry:val("country"),
+      travelCountry:val("country"),
       departDate:val("departDate"),
       returnDate:val("returnDate")
     },
@@ -433,16 +434,23 @@ function validate(d){
 
   const t=d.trip;
 
-  if(!t.destinationCountry)m.push("出發國家");
-  if(!t.departDate)m.push("出發日期");
+  if(!t.travelCountry)m.push("旅遊國家");
+  if(!t.departDate)m.push("去程日期");
   if(!t.returnDate)m.push("回程日期");
+
+  if(t.departDate){
+    const minDepart=getMinDepartureDate();
+    if(t.departDate<minDepart){
+      m.push("去程日期須距離填寫報價時間至少 144 小時");
+    }
+  }
 
   if(
     t.departDate &&
     t.returnDate &&
     t.returnDate<t.departDate
   ){
-    m.push("回程日期不可早於出發日期");
+    m.push("回程日期不可早於去程日期");
   }
 
   d.travelers.forEach((x,i)=>{
@@ -488,6 +496,53 @@ function validate(d){
   }
 }
 
+
+function getMinDepartureDate(){
+  const now=new Date();
+  const minTime=new Date(now.getTime()+144*60*60*1000);
+
+  // 因表單只收日期、不收去程時間，為確保整個去程日期
+  // 不會落在 144 小時限制內，將可選日期向上取整到下一個本地日。
+  const y=minTime.getFullYear();
+  const m=String(minTime.getMonth()+1).padStart(2,"0");
+  const d=String(minTime.getDate()).padStart(2,"0");
+
+  // 如果 144 小時後不是當天 00:00，則下一天才是整日安全可選。
+  const hasTime=
+    minTime.getHours()!==0 ||
+    minTime.getMinutes()!==0 ||
+    minTime.getSeconds()!==0 ||
+    minTime.getMilliseconds()!==0;
+
+  const safeDate=new Date(y+"-"+m+"-"+d+"T00:00:00");
+  if(hasTime){
+    safeDate.setDate(safeDate.getDate()+1);
+  }
+
+  return [
+    safeDate.getFullYear(),
+    String(safeDate.getMonth()+1).padStart(2,"0"),
+    String(safeDate.getDate()).padStart(2,"0")
+  ].join("-");
+}
+
+function applyDepartureDateLimit(){
+  const depart=document.getElementById("departDate");
+  if(!depart)return;
+
+  const minDate=getMinDepartureDate();
+  depart.min=minDate;
+
+  const hint=document.getElementById("minDepartureHint");
+  if(hint){
+    hint.textContent="目前最早可選去程日期："+minDate;
+  }
+
+  if(depart.value && depart.value<minDate){
+    depart.value="";
+  }
+}
+
 function submitApplication(){
   const btn=document.getElementById("submitBtn");
 
@@ -526,6 +581,7 @@ function submitApplication(){
 
 window.addEventListener("load",()=>{
   addTraveler(true);
+  applyDepartureDateLimit();
   initLiff();
 });
 </script>
