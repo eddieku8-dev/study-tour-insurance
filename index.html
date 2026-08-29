@@ -20,7 +20,6 @@ input,select{width:100%;padding:12px;border:1px solid #cfd5dc;border-radius:10px
 .traveler-head{display:flex;justify-content:space-between;align-items:center}
 .hidden{display:none!important}.note{font-size:13px;color:#66717f;line-height:1.55}
 .notice{background:#f3f7ff;padding:12px;border-radius:10px;font-size:13px;line-height:1.55}
-.warning{background:#fff8e9;padding:12px;border-radius:10px;font-size:13px;line-height:1.55}
 button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:pointer}.primary{width:100%;background:#111;color:#fff;font-weight:700}.secondary{background:#edf0f4}.delete{background:#fff0f0;color:#a52828;padding:8px 10px;font-size:13px}
 .ok{color:#137333}.bad{color:#c5221f}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
@@ -46,7 +45,10 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 <option value="尊榮型">尊榮型｜保額 1,000 萬</option>
 <option value="其他">其他保額</option>
 </select>
-<div id="customAmountBox" class="hidden"><label>其他保額（萬元） *</label><input id="customAmount" type="number" min="1" inputmode="numeric"></div>
+<div id="customAmountBox" class="hidden">
+<label>其他保額（萬元） *</label>
+<input id="customAmount" type="number" min="1" inputmode="numeric">
+</div>
 </div>
 
 <div class="card">
@@ -85,56 +87,9 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 </div>
 
 <div class="card">
-<div class="step">STEP 6</div><h2>信用卡繳費資料</h2>
-
-<label>繳款人 *</label>
-<input id="payerName">
-
-<label>繳款人與要保人關係 *</label>
-<select id="payerRelation" onchange="togglePayerRelationOther()">
-<option>本人</option>
-<option>父母</option>
-<option>子女</option>
-<option>兄弟姊妹</option>
-<option>其他</option>
-</select>
-
-<div id="payerRelationOtherBox" class="hidden">
-<label>其他關係 *</label>
-<input id="payerRelationOther">
-</div>
-
-<label>發卡銀行 *</label>
-<input id="issuerBank" placeholder="例如：國泰世華">
-
-<label>信用卡卡號 *</label>
-<input id="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456">
-
-<div class="grid2">
-<div>
-<label>有效月份 *</label>
-<select id="expiryMonth">
-<option value="">MM</option>
-<option>01</option><option>02</option><option>03</option><option>04</option>
-<option>05</option><option>06</option><option>07</option><option>08</option>
-<option>09</option><option>10</option><option>11</option><option>12</option>
-</select>
-</div>
-<div>
-<label>有效年份 *</label>
-<input id="expiryYear" inputmode="numeric" maxlength="4" placeholder="2029">
-</div>
-</div>
-
-<div class="warning" style="margin-top:14px">
-完整卡號不會直接寫入 Google Sheet。正式送出前會先送至公司核准的安全卡片端點，後台只保存 token、末四碼、發卡銀行與有效日期。
-</div>
-</div>
-
-<div class="card">
-<div class="step">STEP 7</div><h2>送出投保資料</h2>
+<div class="step">STEP 6</div><h2>送出投保／報價資料</h2>
 <div class="notice">
-送出後系統會建立報價單號。專員再依資料人工輸入保險公司系統確認實際保費。
+本階段只送出投保與報價所需資料，不收取信用卡或繳費資訊。專員確認實際保費後，再進行後續投保與付款。
 </div>
 <div style="height:12px"></div>
 <button id="submitBtn" class="primary" onclick="submitApplication()">送出投保資料並取得報價單號</button>
@@ -151,9 +106,6 @@ const LIFF_ID = "2011319653-aVI0Ar9E";
 /* ★ 換成你的 Apps Script /exec 網址 */
 const API_URL = "https://script.google.com/macros/s/AKfycbxzRfLG6HS_2exhi9v43gxOvVmIjYR8y59c4ptmXup7XyNOT_lnrWZPuDGlyZJ6bmfXuw/exec";
 
-/* ★ 換成公司核准的安全信用卡端點 */
-const SECURE_CARD_ENDPOINT = "PASTE_YOUR_SECURE_CARD_ENDPOINT_HERE";
-
 let idToken = "";
 let travelerSeq = 0;
 const relations = ["本人","父母","子女","兄弟姊妹","其他"];
@@ -164,22 +116,31 @@ function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 async function initLiff(){
   try{
     await liff.init({liffId:LIFF_ID});
-    if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}
+    if(!liff.isLoggedIn()){
+      liff.login({redirectUri:location.href});
+      return;
+    }
+
     idToken=liff.getIDToken()||"";
+
     document.getElementById("lineStatus").innerHTML=idToken
       ?'<span class="ok">✅ LINE 已連線，可以送出資料</span>'
       :'<span class="bad">❌ 無法取得 LINE ID Token</span>';
+
   }catch(e){
-    document.getElementById("lineStatus").innerHTML='<span class="bad">❌ '+esc(e.message||e)+'</span>';
+    document.getElementById("lineStatus").innerHTML=
+      '<span class="bad">❌ '+esc(e.message||e)+'</span>';
   }
 }
 
 function toggleCustomAmount(){
-  document.getElementById("customAmountBox").classList.toggle("hidden",val("travelPlan")!=="其他")
+  document.getElementById("customAmountBox")
+    .classList.toggle("hidden",val("travelPlan")!=="其他");
 }
 
 function renderInconvenience(){
-  const i=val("insurer"),a=document.getElementById("inconvenienceArea");
+  const i=val("insurer");
+  const a=document.getElementById("inconvenienceArea");
 
   if(i==="安達產險"){
     a.innerHTML=radios(["超值型","尊榮型","不附加不便險"]);
@@ -193,24 +154,34 @@ function renderInconvenience(){
 }
 
 function radios(values){
-  return '<div class="options">'+values.map((x,i)=>
-    `<label class="choice"><input type="radio" name="inconvenience" value="${x}" ${i===0?"checked":""}> ${x}</label>`
-  ).join("")+'</div>'
+  return '<div class="options">'+
+    values.map((x,i)=>
+      `<label class="choice"><input type="radio" name="inconvenience" value="${x}" ${i===0?"checked":""}> ${x}</label>`
+    ).join("")+
+  '</div>';
 }
 
 function selectedInc(){
-  if(val("insurer")==="富邦產險")return"已包含不便險";
+  if(val("insurer")==="富邦產險"){
+    return "已包含不便險";
+  }
+
   const x=document.querySelector('input[name="inconvenience"]:checked');
-  return x?x.value:""
+  return x?x.value:"";
 }
 
 function relationSelect(cls){
-  return `<select class="${cls}">${relations.map(x=>`<option>${x}</option>`).join("")}</select>`
+  return `<select class="${cls}">
+    ${relations.map(x=>`<option>${x}</option>`).join("")}
+  </select>`;
 }
 
 function addTraveler(fromApplicant=false){
   travelerSeq++;
-  const n=travelerSeq,el=document.createElement("div");
+
+  const n=travelerSeq;
+  const el=document.createElement("div");
+
   el.className="traveler";
   el.id="traveler-"+n;
 
@@ -219,28 +190,69 @@ function addTraveler(fromApplicant=false){
     <strong>旅客 ${n}</strong>
     ${n>1?`<button type="button" class="delete" onclick="removeTraveler(${n})">刪除</button>`:""}
   </div>
-  <label>姓名 *</label><input class="t-name">
-  <label>身分證字號 *</label><input class="t-id" maxlength="10">
-  <label>出生年月日 *</label><input class="t-birth" type="date">
-  <label>與要保人關係 *</label>${relationSelect("t-rel")}
-  <div class="t-rel-other-box hidden"><label>其他關係 *</label><input class="t-rel-other"></div>
+
+  <label>姓名 *</label>
+  <input class="t-name">
+
+  <label>身分證字號 *</label>
+  <input class="t-id" maxlength="10">
+
+  <label>出生年月日 *</label>
+  <input class="t-birth" type="date">
+
+  <label>與要保人關係 *</label>
+  ${relationSelect("t-rel")}
+
+  <div class="t-rel-other-box hidden">
+    <label>其他關係 *</label>
+    <input class="t-rel-other">
+  </div>
+
   <label>是否與主要行程相同日期？ *</label>
-  <select class="t-same"><option value="true">是</option><option value="false">否</option></select>
+  <select class="t-same">
+    <option value="true">是</option>
+    <option value="false">否</option>
+  </select>
+
   <div class="t-date-box hidden">
     <div class="grid2">
-      <div><label>個人出發日期 *</label><input class="t-depart" type="date"></div>
-      <div><label>個人回程日期 *</label><input class="t-return" type="date"></div>
+      <div>
+        <label>個人出發日期 *</label>
+        <input class="t-depart" type="date">
+      </div>
+      <div>
+        <label>個人回程日期 *</label>
+        <input class="t-return" type="date">
+      </div>
     </div>
   </div>
+
   <label>目前是否受有監護宣告？ *</label>
-  <select class="t-guard"><option value="false">否</option><option value="true">是</option></select>
+  <select class="t-guard">
+    <option value="false">否</option>
+    <option value="true">是</option>
+  </select>
+
   <label>身故受益人 *</label>
-  <select class="t-btype"><option>法定繼承人</option><option>指定受益人</option></select>
+  <select class="t-btype">
+    <option>法定繼承人</option>
+    <option>指定受益人</option>
+  </select>
+
   <div class="t-beneficiary hidden">
-    <label>受益人姓名 *</label><input class="b-name">
-    <label>受益人身分證字號 *</label><input class="b-id" maxlength="10">
-    <label>與被保險人關係 *</label>${relationSelect("b-rel")}
-    <div class="b-rel-other-box hidden"><label>其他關係 *</label><input class="b-rel-other"></div>
+    <label>受益人姓名 *</label>
+    <input class="b-name">
+
+    <label>受益人身分證字號 *</label>
+    <input class="b-id" maxlength="10">
+
+    <label>與被保險人關係 *</label>
+    ${relationSelect("b-rel")}
+
+    <div class="b-rel-other-box hidden">
+      <label>其他關係 *</label>
+      <input class="b-rel-other">
+    </div>
   </div>`;
 
   document.getElementById("travelers").appendChild(el);
@@ -250,20 +262,38 @@ function addTraveler(fromApplicant=false){
   const bt=el.querySelector(".t-btype");
   const br=el.querySelector(".b-rel");
 
-  tr.onchange=()=>el.querySelector(".t-rel-other-box").classList.toggle("hidden",tr.value!=="其他");
-  same.onchange=()=>el.querySelector(".t-date-box").classList.toggle("hidden",same.value!=="false");
-  bt.onchange=()=>el.querySelector(".t-beneficiary").classList.toggle("hidden",bt.value!=="指定受益人");
-  br.onchange=()=>el.querySelector(".b-rel-other-box").classList.toggle("hidden",br.value!=="其他");
+  tr.onchange=()=>{
+    el.querySelector(".t-rel-other-box")
+      .classList.toggle("hidden",tr.value!=="其他");
+  };
 
-  if(fromApplicant)fillTraveler(el);
+  same.onchange=()=>{
+    el.querySelector(".t-date-box")
+      .classList.toggle("hidden",same.value!=="false");
+  };
+
+  bt.onchange=()=>{
+    el.querySelector(".t-beneficiary")
+      .classList.toggle("hidden",bt.value!=="指定受益人");
+  };
+
+  br.onchange=()=>{
+    el.querySelector(".b-rel-other-box")
+      .classList.toggle("hidden",br.value!=="其他");
+  };
+
+  if(fromApplicant){
+    fillTraveler(el);
+  }
 }
 
 function removeTraveler(n){
-  document.getElementById("traveler-"+n)?.remove()
+  document.getElementById("traveler-"+n)?.remove();
 }
 
 function fillTraveler(el){
   if(!el)return;
+
   el.querySelector(".t-name").value=val("applicantName");
   el.querySelector(".t-id").value=val("applicantId");
   el.querySelector(".t-birth").value=val("applicantBirth");
@@ -273,6 +303,7 @@ function fillTraveler(el){
 
 function syncApplicantTraveler(){
   const e=document.querySelector(".traveler");
+
   if(!e)return;
 
   if(val("applicantIsTraveler")==="true"){
@@ -284,11 +315,6 @@ function syncApplicantTraveler(){
     e.querySelector(".t-rel").value="其他";
     e.querySelector(".t-rel-other-box").classList.remove("hidden");
   }
-}
-
-function togglePayerRelationOther(){
-  document.getElementById("payerRelationOtherBox")
-    .classList.toggle("hidden",val("payerRelation")!=="其他");
 }
 
 function travelers(){
@@ -303,19 +329,41 @@ function travelers(){
       idNumber:el.querySelector(".t-id").value.trim(),
       birthDate:el.querySelector(".t-birth").value,
       relation,
-      relationOther:relation==="其他"?el.querySelector(".t-rel-other").value.trim():"",
-      departDate:same?val("departDate"):el.querySelector(".t-depart").value,
-      returnDate:same?val("returnDate"):el.querySelector(".t-return").value,
-      underGuardianship:el.querySelector(".t-guard").value==="true",
+      relationOther:
+        relation==="其他"
+          ?el.querySelector(".t-rel-other").value.trim()
+          :"",
+      departDate:
+        same
+          ?val("departDate")
+          :el.querySelector(".t-depart").value,
+      returnDate:
+        same
+          ?val("returnDate")
+          :el.querySelector(".t-return").value,
+      underGuardianship:
+        el.querySelector(".t-guard").value==="true",
       beneficiary:{
         type:bt,
-        name:bt==="指定受益人"?el.querySelector(".b-name").value.trim():"",
-        idNumber:bt==="指定受益人"?el.querySelector(".b-id").value.trim():"",
-        relation:bt==="指定受益人"?br:"",
-        relationOther:bt==="指定受益人"&&br==="其他"?el.querySelector(".b-rel-other").value.trim():""
+        name:
+          bt==="指定受益人"
+            ?el.querySelector(".b-name").value.trim()
+            :"",
+        idNumber:
+          bt==="指定受益人"
+            ?el.querySelector(".b-id").value.trim()
+            :"",
+        relation:
+          bt==="指定受益人"
+            ?br
+            :"",
+        relationOther:
+          bt==="指定受益人"&&br==="其他"
+            ?el.querySelector(".b-rel-other").value.trim()
+            :""
       }
-    }
-  })
+    };
+  });
 }
 
 function buildData(){
@@ -324,14 +372,21 @@ function buildData(){
   }
 
   const plan=val("travelPlan");
-  const amountMap={"基本型":300,"豪華型":500,"尊榮型":1000};
+  const amountMap={
+    "基本型":300,
+    "豪華型":500,
+    "尊榮型":1000
+  };
 
   return{
     idToken,
     insuranceSelection:{
       insurer:val("insurer"),
       travelPlan:plan,
-      insuredAmountWan:plan==="其他"?Number(val("customAmount")||0):amountMap[plan]||0,
+      insuredAmountWan:
+        plan==="其他"
+          ?Number(val("customAmount")||0)
+          :amountMap[plan]||0,
       inconveniencePlan:selectedInc()
     },
     applicant:{
@@ -347,9 +402,10 @@ function buildData(){
       departDate:val("departDate"),
       returnDate:val("returnDate")
     },
-    applicantIsTraveler:val("applicantIsTraveler")==="true",
+    applicantIsTraveler:
+      val("applicantIsTraveler")==="true",
     travelers:travelers()
-  }
+  };
 }
 
 function validate(d){
@@ -358,9 +414,16 @@ function validate(d){
   if(!idToken)m.push("LINE 尚未連線");
   if(!d.insuranceSelection.insurer)m.push("保險公司");
   if(!d.insuranceSelection.travelPlan)m.push("旅平險方案");
-  if(d.insuranceSelection.travelPlan==="其他"&&!d.insuranceSelection.insuredAmountWan)m.push("其他保額");
+
+  if(
+    d.insuranceSelection.travelPlan==="其他" &&
+    !d.insuranceSelection.insuredAmountWan
+  ){
+    m.push("其他保額");
+  }
 
   const a=d.applicant;
+
   if(!a.name)m.push("要保人姓名");
   if(!a.idNumber)m.push("要保人身分證");
   if(!a.birthDate)m.push("出生年月日");
@@ -369,71 +432,63 @@ function validate(d){
   if(!a.email)m.push("Email");
 
   const t=d.trip;
+
   if(!t.destinationCountry)m.push("出發國家");
   if(!t.departDate)m.push("出發日期");
   if(!t.returnDate)m.push("回程日期");
-  if(t.departDate&&t.returnDate&&t.returnDate<t.departDate)m.push("回程日期不可早於出發日期");
+
+  if(
+    t.departDate &&
+    t.returnDate &&
+    t.returnDate<t.departDate
+  ){
+    m.push("回程日期不可早於出發日期");
+  }
 
   d.travelers.forEach((x,i)=>{
     const n=i+1;
+
     if(!x.name)m.push(`旅客${n}姓名`);
     if(!x.idNumber)m.push(`旅客${n}身分證`);
     if(!x.birthDate)m.push(`旅客${n}生日`);
-    if(x.relation==="其他"&&!x.relationOther)m.push(`旅客${n}其他關係`);
-    if(!x.departDate||!x.returnDate)m.push(`旅客${n}日期`);
+
+    if(
+      x.relation==="其他" &&
+      !x.relationOther
+    ){
+      m.push(`旅客${n}其他關係`);
+    }
+
+    if(!x.departDate||!x.returnDate){
+      m.push(`旅客${n}日期`);
+    }
 
     if(x.beneficiary.type==="指定受益人"){
-      if(!x.beneficiary.name)m.push(`旅客${n}受益人姓名`);
-      if(!x.beneficiary.idNumber)m.push(`旅客${n}受益人身分證`);
-      if(x.beneficiary.relation==="其他"&&!x.beneficiary.relationOther)m.push(`旅客${n}受益人其他關係`);
+      if(!x.beneficiary.name){
+        m.push(`旅客${n}受益人姓名`);
+      }
+
+      if(!x.beneficiary.idNumber){
+        m.push(`旅客${n}受益人身分證`);
+      }
+
+      if(
+        x.beneficiary.relation==="其他" &&
+        !x.beneficiary.relationOther
+      ){
+        m.push(`旅客${n}受益人其他關係`);
+      }
     }
   });
 
-  if(!val("payerName"))m.push("繳款人");
-  if(val("payerRelation")==="其他"&&!val("payerRelationOther"))m.push("繳款人其他關係");
-  if(!val("issuerBank"))m.push("發卡銀行");
-
-  const cardNumber=document.getElementById("cardNumber").value.replace(/\D/g,"");
-  if(cardNumber.length<13||cardNumber.length>19)m.push("信用卡卡號");
-  if(!val("expiryMonth"))m.push("有效月份");
-  if(!val("expiryYear"))m.push("有效年份");
-
-  if(m.length)throw new Error("請確認：\n• "+m.join("\n• "));
+  if(m.length){
+    throw new Error(
+      "請確認：\n• "+m.join("\n• ")
+    );
+  }
 }
 
-async function tokenizeCard(){
-  if(SECURE_CARD_ENDPOINT.includes("PASTE_YOUR_")){
-    throw new Error("尚未設定 SECURE_CARD_ENDPOINT。信用卡完整卡號不能直接寫入 Google Sheet。");
-  }
-
-  const cardNumber=document.getElementById("cardNumber").value.replace(/\D/g,"");
-
-  const response=await fetch(SECURE_CARD_ENDPOINT,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      cardNumber,
-      expiryMonth:val("expiryMonth"),
-      expiryYear:val("expiryYear"),
-      payerName:val("payerName"),
-      issuerBank:val("issuerBank")
-    })
-  });
-
-  if(!response.ok){
-    throw new Error("信用卡安全登記失敗");
-  }
-
-  const result=await response.json();
-
-  if(!result.token||!result.last4){
-    throw new Error("安全卡片端點未回傳 token / last4");
-  }
-
-  return result;
-}
-
-async function submitApplication(){
+function submitApplication(){
   const btn=document.getElementById("submitBtn");
 
   try{
@@ -444,29 +499,19 @@ async function submitApplication(){
     const d=buildData();
     validate(d);
 
-    if(!confirm("確認送出投保資料並取得報價單號？"))return;
+    if(
+      !confirm(
+        "確認送出投保／報價資料？\n送出後將建立報價單號並進入待報價。"
+      )
+    ){
+      return;
+    }
 
     btn.disabled=true;
-    btn.textContent="正在安全登記信用卡…";
+    btn.textContent="正在送出…";
 
-    const card=await tokenizeCard();
-
-    d.payment={
-      payerName:val("payerName"),
-      payerRelation:val("payerRelation"),
-      payerRelationOther:val("payerRelation")==="其他"?val("payerRelationOther"):"",
-      issuerBank:val("issuerBank"),
-      cardToken:card.token,
-      cardLast4:card.last4,
-      expiryMonth:val("expiryMonth"),
-      expiryYear:val("expiryYear")
-    };
-
-    document.getElementById("cardNumber").value="";
-
-    btn.textContent="正在送出投保資料…";
-
-    document.getElementById("payload").value=JSON.stringify(d);
+    document.getElementById("payload").value=
+      JSON.stringify(d);
 
     const f=document.getElementById("postForm");
     f.action=API_URL;
