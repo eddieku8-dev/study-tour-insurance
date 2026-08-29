@@ -1,510 +1,215 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="format-detection" content="telephone=no">
-  <title>遊學團旅平險｜投保資料</title>
-  <script src="https://static.line-scdn.net/liff/edge/versions/2.30.0/sdk.js"></script>
-  <style>
-    *{box-sizing:border-box}
-    body{font-family:Arial,"Noto Sans TC",sans-serif;background:#f4f6f8;margin:0;color:#202124}
-    .wrap{max-width:760px;margin:auto;padding:16px 14px 48px}
-    .hero{padding:10px 4px 4px}
-    .hero h1{font-size:24px;margin:0 0 6px}
-    .hero p{margin:0;color:#657080;font-size:14px}
-    .card{background:#fff;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 3px 16px rgba(0,0,0,.06)}
-    h2{font-size:19px;margin:0 0 14px}
-    .step{font-size:12px;color:#657080;margin-bottom:4px;font-weight:700;letter-spacing:.04em}
-    label{display:block;font-weight:650;margin:13px 0 6px}
-    input,select{width:100%;padding:12px;border:1px solid #cfd5dc;border-radius:10px;background:#fff;font-size:16px}
-    input:focus,select:focus{outline:2px solid #b9d6ff;border-color:#75a9ef}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .options{display:grid;grid-template-columns:1fr;gap:9px}
-    .choice{border:1px solid #d9dee5;border-radius:11px;padding:11px;background:#fafbfc;font-weight:500}
-    .choice input{width:auto;margin-right:7px}
-    .traveler{border:1px solid #dde2e8;border-radius:14px;padding:15px;margin-top:14px;background:#fcfcfd}
-    .traveler-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .traveler-head strong{font-size:17px}
-    .hidden{display:none!important}
-    .note{font-size:13px;color:#66717f;line-height:1.55}
-    .notice{background:#f3f7ff;padding:12px;border-radius:10px;font-size:13px;line-height:1.55}
-    .warning{background:#fff8e9;padding:12px;border-radius:10px;font-size:13px;line-height:1.55}
-    button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:pointer}
-    .primary{width:100%;background:#111;color:#fff;font-weight:700}
-    .secondary{background:#edf0f4;color:#252a31}
-    .delete{background:#fff0f0;color:#a52828;padding:8px 10px;font-size:13px}
-    .status{font-size:13px;line-height:1.6}
-    .ok{color:#137333} .bad{color:#c5221f} .muted{color:#657080}
-    .summary{background:#f7f9fb;border-radius:12px;padding:13px;line-height:1.7;font-size:14px}
-    @media(max-width:560px){.grid2{grid-template-columns:1fr}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>遊學團旅平險｜投保資料</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.30.0/sdk.js"></script>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,"Noto Sans TC",sans-serif;background:#f4f6f8;margin:0;color:#202124}
+.wrap{max-width:760px;margin:auto;padding:16px 14px 48px}
+.hero{padding:10px 4px 4px}.hero h1{font-size:24px;margin:0 0 6px}.hero p{margin:0;color:#657080;font-size:14px}
+.card{background:#fff;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 3px 16px rgba(0,0,0,.06)}
+h2{font-size:19px;margin:0 0 14px}.step{font-size:12px;color:#657080;margin-bottom:4px;font-weight:700}
+label{display:block;font-weight:650;margin:13px 0 6px}
+input,select{width:100%;padding:12px;border:1px solid #cfd5dc;border-radius:10px;background:#fff;font-size:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.options{display:grid;gap:9px}
+.choice{border:1px solid #d9dee5;border-radius:11px;padding:11px;background:#fafbfc;font-weight:500}.choice input{width:auto;margin-right:7px}
+.traveler{border:1px solid #dde2e8;border-radius:14px;padding:15px;margin-top:14px;background:#fcfcfd}
+.traveler-head{display:flex;justify-content:space-between;align-items:center}
+.hidden{display:none!important}.note{font-size:13px;color:#66717f;line-height:1.55}
+.notice{background:#f3f7ff;padding:12px;border-radius:10px;font-size:13px;line-height:1.55}
+button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:pointer}.primary{width:100%;background:#111;color:#fff;font-weight:700}.secondary{background:#edf0f4}.delete{background:#fff0f0;color:#a52828;padding:8px 10px;font-size:13px}
+.ok{color:#137333}.bad{color:#c5221f}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <div class="hero">
-    <h1>🌏 遊學團旅平險</h1>
-    <p>方案選擇與投保資料填寫</p>
-  </div>
+<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫</p></div>
 
-  <div class="card">
-    <h2>LINE 連線</h2>
-    <div id="lineStatus" class="status">正在確認 LINE 身分…</div>
-  </div>
+<div class="card"><h2>LINE 連線</h2><div id="lineStatus">正在確認 LINE 身分…</div></div>
 
-  <div class="card">
-    <div class="step">STEP 1</div>
-    <h2>選擇旅平險方案</h2>
-
-    <label for="insurer">保險公司 *</label>
-    <select id="insurer" onchange="renderInconvenience()">
-      <option value="">請選擇</option>
-      <option value="安達產險">安達產險</option>
-      <option value="富邦產險">富邦產險</option>
-      <option value="新光產險">新光產險</option>
-    </select>
-
-    <label for="travelPlan">旅平險方案 *</label>
-    <select id="travelPlan" onchange="toggleCustomAmount()">
-      <option value="">請選擇</option>
-      <option value="基本型">基本型｜保額 300 萬</option>
-      <option value="豪華型">豪華型｜保額 500 萬</option>
-      <option value="尊榮型">尊榮型｜保額 1,000 萬</option>
-      <option value="其他">其他保額</option>
-    </select>
-
-    <div id="customAmountBox" class="hidden">
-      <label for="customAmount">其他保額（萬元） *</label>
-      <input id="customAmount" type="number" min="1" inputmode="numeric" placeholder="例如：800">
-    </div>
-  </div>
-
-  <div class="card" id="inconvenienceCard">
-    <div class="step">STEP 2</div>
-    <h2>旅遊不便險</h2>
-    <div id="inconvenienceArea" class="note">請先選擇保險公司。</div>
-  </div>
-
-  <div class="card">
-    <div class="step">STEP 3</div>
-    <h2>要保人資料</h2>
-
-    <label for="applicantName">要保人姓名 *</label>
-    <input id="applicantName" autocomplete="name">
-
-    <label for="applicantId">身分證字號 *</label>
-    <input id="applicantId" maxlength="10" autocomplete="off">
-
-    <label for="applicantBirth">出生年月日 *</label>
-    <input id="applicantBirth" type="date">
-
-    <label for="applicantPhone">電話 *</label>
-    <input id="applicantPhone" inputmode="tel" autocomplete="tel">
-
-    <label for="applicantAddress">地址 *</label>
-    <input id="applicantAddress" autocomplete="street-address">
-
-    <label for="applicantEmail">Email *</label>
-    <input id="applicantEmail" type="email" autocomplete="email">
-  </div>
-
-  <div class="card">
-    <div class="step">STEP 4</div>
-    <h2>旅遊資料</h2>
-
-    <label for="country">出發國家 *</label>
-    <input id="country" placeholder="例如：英國">
-
-    <div class="grid2">
-      <div>
-        <label for="departDate">出發日期 *</label>
-        <input id="departDate" type="date">
-      </div>
-      <div>
-        <label for="returnDate">回程日期 *</label>
-        <input id="returnDate" type="date">
-      </div>
-    </div>
-
-    <label for="applicantIsTraveler">要保人是否也是被保險人／同行旅客？ *</label>
-    <select id="applicantIsTraveler" onchange="syncApplicantTraveler()">
-      <option value="true">是</option>
-      <option value="false">否</option>
-    </select>
-  </div>
-
-  <div class="card">
-    <div class="step">STEP 5</div>
-    <h2>被保險人／同行旅客</h2>
-    <p class="note">每位需要投保的同行者都請建立一筆資料。</p>
-    <div id="travelers"></div>
-    <button type="button" class="secondary" onclick="addTraveler(false)">＋ 新增同行旅客</button>
-  </div>
-
-  <div class="card">
-    <div class="step">STEP 6</div>
-    <h2>確認資料</h2>
-    <div class="notice">
-      本階段為投保／報價資料蒐集。實際保費仍須由專員於保險公司系統人工確認。<br>
-      <strong>信用卡資料會在報價確認後的第二階段另外填寫。</strong>
-    </div>
-    <div style="height:12px"></div>
-    <button class="primary" onclick="reviewApplication()">檢查投保資料</button>
-  </div>
-
-  <div id="reviewCard" class="card hidden">
-    <h2>✅ 前端資料檢查完成</h2>
-    <div id="reviewSummary" class="summary"></div>
-    <p class="note">目前這一版先確認 LINE 與完整表單運作正常；下一步會把此按鈕接到 Google Sheet API。</p>
-  </div>
+<div class="card">
+<div class="step">STEP 1</div><h2>選擇旅平險方案</h2>
+<label>保險公司 *</label>
+<select id="insurer" onchange="renderInconvenience()">
+<option value="">請選擇</option><option>安達產險</option><option>富邦產險</option><option>新光產險</option>
+</select>
+<label>旅平險方案 *</label>
+<select id="travelPlan" onchange="toggleCustomAmount()">
+<option value="">請選擇</option>
+<option value="基本型">基本型｜保額 300 萬</option>
+<option value="豪華型">豪華型｜保額 500 萬</option>
+<option value="尊榮型">尊榮型｜保額 1,000 萬</option>
+<option value="其他">其他保額</option>
+</select>
+<div id="customAmountBox" class="hidden"><label>其他保額（萬元） *</label><input id="customAmount" type="number" min="1" inputmode="numeric"></div>
 </div>
+
+<div class="card"><div class="step">STEP 2</div><h2>旅遊不便險</h2><div id="inconvenienceArea" class="note">請先選擇保險公司。</div></div>
+
+<div class="card">
+<div class="step">STEP 3</div><h2>要保人資料</h2>
+<label>要保人姓名 *</label><input id="applicantName">
+<label>身分證字號 *</label><input id="applicantId" maxlength="10">
+<label>出生年月日 *</label><input id="applicantBirth" type="date">
+<label>電話 *</label><input id="applicantPhone" inputmode="tel">
+<label>地址 *</label><input id="applicantAddress">
+<label>Email *</label><input id="applicantEmail" type="email">
+</div>
+
+<div class="card">
+<div class="step">STEP 4</div><h2>旅遊資料</h2>
+<label>出發國家 *</label><input id="country">
+<div class="grid2"><div><label>出發日期 *</label><input id="departDate" type="date"></div><div><label>回程日期 *</label><input id="returnDate" type="date"></div></div>
+<label>要保人是否也是被保險人／同行旅客？ *</label>
+<select id="applicantIsTraveler" onchange="syncApplicantTraveler()"><option value="true">是</option><option value="false">否</option></select>
+</div>
+
+<div class="card">
+<div class="step">STEP 5</div><h2>被保險人／同行旅客</h2>
+<div id="travelers"></div>
+<button type="button" class="secondary" onclick="addTraveler(false)">＋ 新增同行旅客</button>
+</div>
+
+<div class="card">
+<div class="step">STEP 6</div><h2>送出投保／報價資料</h2>
+<div class="notice">實際保費需由專員人工輸入保險公司系統確認。本階段尚未完成正式投保，也不會收取信用卡資料。</div>
+<div style="height:12px"></div>
+<button id="submitBtn" class="primary" onclick="submitApplication()">送出投保資料</button>
+</div>
+</div>
+
+<form id="postForm" method="POST" style="display:none">
+<input type="hidden" name="payload" id="payload">
+</form>
 
 <script>
 const LIFF_ID = "2011319653-aVI0Ar9E";
+
+/* ★ 只需要把下面這行換成你的 Apps Script /exec 網址 */
+const API_URL = "https://script.google.com/macros/s/AKfycbxzRfLG6HS_2exhi9v43gxOvVmIjYR8y59c4ptmXup7XyNOT_lnrWZPuDGlyZJ6bmfXuw/exec";
+
 let idToken = "";
 let travelerSeq = 0;
+const relations = ["本人","父母","子女","兄弟姊妹","其他"];
 
-const relationOptions = ["本人","父母","子女","兄弟姊妹","其他"];
+function val(id){return document.getElementById(id).value.trim()}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
-function esc(v) {
-  return String(v ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
-}
-
-function val(id) {
-  return document.getElementById(id).value.trim();
-}
-
-function setLineStatus(html) {
-  document.getElementById("lineStatus").innerHTML = html;
-}
-
-async function initLiff() {
-  try {
-    await liff.init({ liffId: LIFF_ID });
-    if (!liff.isLoggedIn()) {
-      setLineStatus('⚠️ 尚未登入 LINE，正在前往登入…');
-      liff.login({ redirectUri: location.href });
-      return;
-    }
-
-    idToken = liff.getIDToken() || "";
-    let displayName = "";
-    try {
-      const p = await liff.getProfile();
-      displayName = p.displayName || "";
-    } catch (_) {}
-
-    setLineStatus(
-      `<span class="ok">✅ LINE 已連線</span>` +
-      (displayName ? `<br>使用者：${esc(displayName)}` : "") +
-      `<br>ID Token：${idToken ? "✅ 已取得" : "❌ 未取得"}`
-    );
-  } catch (e) {
-    setLineStatus(`<span class="bad">❌ LIFF 初始化失敗：${esc(e.message || e)}</span>`);
+async function initLiff(){
+  try{
+    await liff.init({liffId:LIFF_ID});
+    if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}
+    idToken=liff.getIDToken()||"";
+    document.getElementById("lineStatus").innerHTML=idToken?'<span class="ok">✅ LINE 已連線，可以送出資料</span>':'<span class="bad">❌ 無法取得 LINE ID Token</span>';
+  }catch(e){
+    document.getElementById("lineStatus").innerHTML='<span class="bad">❌ '+esc(e.message||e)+'</span>';
   }
 }
 
-function toggleCustomAmount() {
-  document.getElementById("customAmountBox")
-    .classList.toggle("hidden", val("travelPlan") !== "其他");
+function toggleCustomAmount(){document.getElementById("customAmountBox").classList.toggle("hidden",val("travelPlan")!=="其他")}
+
+function renderInconvenience(){
+  const i=val("insurer"),a=document.getElementById("inconvenienceArea");
+  if(i==="安達產險")a.innerHTML=radios(["超值型","尊榮型","不附加不便險"]);
+  else if(i==="富邦產險")a.innerHTML='<div class="notice"><strong>富邦產險：</strong>此步驟跳過。</div>';
+  else if(i==="新光產險")a.innerHTML=radios(["標準型","豪華型","不附加不便險"]);
+  else a.textContent="請先選擇保險公司。";
 }
+function radios(values){return '<div class="options">'+values.map((x,i)=>`<label class="choice"><input type="radio" name="inconvenience" value="${x}" ${i===0?"checked":""}> ${x}</label>`).join("")+'</div>'}
+function selectedInc(){if(val("insurer")==="富邦產險")return"跳過";const x=document.querySelector('input[name="inconvenience"]:checked');return x?x.value:""}
 
-function renderInconvenience() {
-  const insurer = val("insurer");
-  const area = document.getElementById("inconvenienceArea");
+function relationSelect(cls){return `<select class="${cls}">${relations.map(x=>`<option>${x}</option>`).join("")}</select>`}
 
-  if (insurer === "安達產險") {
-    area.innerHTML = radioOptions("inconvenience", ["超值型","尊榮型","不附加不便險"]);
-  } else if (insurer === "富邦產險") {
-    area.innerHTML = '<div class="notice"><strong>富邦產險：</strong>此步驟跳過。</div>';
-  } else if (insurer === "新光產險") {
-    area.innerHTML = radioOptions("inconvenience", ["標準型","豪華型","不附加不便險"]);
-  } else {
-    area.innerHTML = '<span class="muted">請先選擇保險公司。</span>';
-  }
-}
-
-function radioOptions(name, values) {
-  return `<div class="options">${values.map((x,i) =>
-    `<label class="choice"><input type="radio" name="${name}" value="${x}" ${i===0?"checked":""}> ${x}</label>`
-  ).join("")}</div>`;
-}
-
-function selectedInconvenience() {
-  if (val("insurer") === "富邦產險") return "跳過";
-  const r = document.querySelector('input[name="inconvenience"]:checked');
-  return r ? r.value : "";
-}
-
-function relationSelect(className) {
-  return `<select class="${className}">
-    ${relationOptions.map(x=>`<option value="${x}">${x}</option>`).join("")}
-  </select>`;
-}
-
-function addTraveler(fromApplicant=false) {
-  travelerSeq += 1;
-  const n = travelerSeq;
-  const el = document.createElement("div");
-  el.className = "traveler";
-  el.id = `traveler-${n}`;
-
-  el.innerHTML = `
-    <div class="traveler-head">
-      <strong>旅客 ${n}</strong>
-      ${n > 1 ? `<button type="button" class="delete" onclick="removeTraveler(${n})">刪除</button>` : ""}
-    </div>
-
-    <label>姓名 *</label>
-    <input class="t-name">
-
-    <label>身分證字號 *</label>
-    <input class="t-id" maxlength="10">
-
-    <label>出生年月日 *</label>
-    <input class="t-birth" type="date">
-
-    <label>與要保人關係 *</label>
-    ${relationSelect("t-relation")}
-
-    <div class="t-relation-other-box hidden">
-      <label>其他關係 *</label>
-      <input class="t-relation-other" placeholder="請填寫實際關係">
-    </div>
-
-    <label>是否與主要行程相同出發／回程日期？ *</label>
-    <select class="t-same-period">
-      <option value="true">是</option>
-      <option value="false">否</option>
-    </select>
-
-    <div class="t-dates hidden">
-      <div class="grid2">
-        <div>
-          <label>個人出發日期 *</label>
-          <input class="t-depart" type="date">
-        </div>
-        <div>
-          <label>個人回程日期 *</label>
-          <input class="t-return" type="date">
-        </div>
-      </div>
-    </div>
-
-    <label>被保險人目前是否受有監護宣告？ *</label>
-    <select class="t-guardianship">
-      <option value="false">否</option>
-      <option value="true">是</option>
-    </select>
-
-    <label>身故受益人 *</label>
-    <select class="t-beneficiary-type">
-      <option value="法定繼承人">法定繼承人（免填受益人資料）</option>
-      <option value="指定受益人">指定受益人</option>
-    </select>
-
-    <div class="t-beneficiary hidden">
-      <label>受益人姓名 *</label>
-      <input class="b-name">
-
-      <label>受益人身分證字號 *</label>
-      <input class="b-id" maxlength="10">
-
-      <label>與被保險人關係 *</label>
-      ${relationSelect("b-relation")}
-
-      <div class="b-relation-other-box hidden">
-        <label>其他關係 *</label>
-        <input class="b-relation-other">
-      </div>
-    </div>
-  `;
-
+function addTraveler(fromApplicant=false){
+  travelerSeq++;const n=travelerSeq,el=document.createElement("div");el.className="traveler";el.id="traveler-"+n;
+  el.innerHTML=`
+  <div class="traveler-head"><strong>旅客 ${n}</strong>${n>1?`<button type="button" class="delete" onclick="removeTraveler(${n})">刪除</button>`:""}</div>
+  <label>姓名 *</label><input class="t-name">
+  <label>身分證字號 *</label><input class="t-id" maxlength="10">
+  <label>出生年月日 *</label><input class="t-birth" type="date">
+  <label>與要保人關係 *</label>${relationSelect("t-rel")}
+  <div class="t-rel-other-box hidden"><label>其他關係 *</label><input class="t-rel-other"></div>
+  <label>是否與主要行程相同日期？ *</label><select class="t-same"><option value="true">是</option><option value="false">否</option></select>
+  <div class="t-date-box hidden"><div class="grid2"><div><label>個人出發日期 *</label><input class="t-depart" type="date"></div><div><label>個人回程日期 *</label><input class="t-return" type="date"></div></div></div>
+  <label>目前是否受有監護宣告？ *</label><select class="t-guard"><option value="false">否</option><option value="true">是</option></select>
+  <label>身故受益人 *</label><select class="t-btype"><option>法定繼承人</option><option>指定受益人</option></select>
+  <div class="t-beneficiary hidden"><label>受益人姓名 *</label><input class="b-name"><label>受益人身分證字號 *</label><input class="b-id" maxlength="10"><label>與被保險人關係 *</label>${relationSelect("b-rel")}<div class="b-rel-other-box hidden"><label>其他關係 *</label><input class="b-rel-other"></div></div>`;
   document.getElementById("travelers").appendChild(el);
-
-  const tRel = el.querySelector(".t-relation");
-  const same = el.querySelector(".t-same-period");
-  const bType = el.querySelector(".t-beneficiary-type");
-  const bRel = el.querySelector(".b-relation");
-
-  tRel.addEventListener("change", () =>
-    el.querySelector(".t-relation-other-box").classList.toggle("hidden", tRel.value !== "其他")
-  );
-  same.addEventListener("change", () =>
-    el.querySelector(".t-dates").classList.toggle("hidden", same.value !== "false")
-  );
-  bType.addEventListener("change", () =>
-    el.querySelector(".t-beneficiary").classList.toggle("hidden", bType.value !== "指定受益人")
-  );
-  bRel.addEventListener("change", () =>
-    el.querySelector(".b-relation-other-box").classList.toggle("hidden", bRel.value !== "其他")
-  );
-
-  if (fromApplicant) fillTravelerFromApplicant(el);
+  const tr=el.querySelector(".t-rel"),same=el.querySelector(".t-same"),bt=el.querySelector(".t-btype"),br=el.querySelector(".b-rel");
+  tr.onchange=()=>el.querySelector(".t-rel-other-box").classList.toggle("hidden",tr.value!=="其他");
+  same.onchange=()=>el.querySelector(".t-date-box").classList.toggle("hidden",same.value!=="false");
+  bt.onchange=()=>el.querySelector(".t-beneficiary").classList.toggle("hidden",bt.value!=="指定受益人");
+  br.onchange=()=>el.querySelector(".b-rel-other-box").classList.toggle("hidden",br.value!=="其他");
+  if(fromApplicant)fillTraveler(el);
 }
+function removeTraveler(n){document.getElementById("traveler-"+n)?.remove()}
+function fillTraveler(el){if(!el)return;el.querySelector(".t-name").value=val("applicantName");el.querySelector(".t-id").value=val("applicantId");el.querySelector(".t-birth").value=val("applicantBirth");el.querySelector(".t-rel").value="本人";el.querySelector(".t-rel-other-box").classList.add("hidden")}
+function syncApplicantTraveler(){const e=document.querySelector(".traveler");if(!e)return;if(val("applicantIsTraveler")==="true")fillTraveler(e);else{e.querySelector(".t-name").value="";e.querySelector(".t-id").value="";e.querySelector(".t-birth").value="";e.querySelector(".t-rel").value="其他";e.querySelector(".t-rel-other-box").classList.remove("hidden")}}
 
-function removeTraveler(n) {
-  const el = document.getElementById(`traveler-${n}`);
-  if (el) el.remove();
-}
-
-function fillTravelerFromApplicant(el) {
-  if (!el) return;
-  el.querySelector(".t-name").value = val("applicantName");
-  el.querySelector(".t-id").value = val("applicantId");
-  el.querySelector(".t-birth").value = val("applicantBirth");
-  el.querySelector(".t-relation").value = "本人";
-  el.querySelector(".t-relation-other-box").classList.add("hidden");
-}
-
-function syncApplicantTraveler() {
-  const first = document.querySelector(".traveler");
-  if (!first) return;
-  if (val("applicantIsTraveler") === "true") {
-    fillTravelerFromApplicant(first);
-  } else {
-    first.querySelector(".t-name").value = "";
-    first.querySelector(".t-id").value = "";
-    first.querySelector(".t-birth").value = "";
-    first.querySelector(".t-relation").value = "其他";
-    first.querySelector(".t-relation-other-box").classList.remove("hidden");
+function travelers(){
+ return [...document.querySelectorAll(".traveler")].map(el=>{
+  const relation=el.querySelector(".t-rel").value;
+  const same=el.querySelector(".t-same").value==="true";
+  const bt=el.querySelector(".t-btype").value;
+  const br=el.querySelector(".b-rel").value;
+  return{
+   name:el.querySelector(".t-name").value.trim(),
+   idNumber:el.querySelector(".t-id").value.trim(),
+   birthDate:el.querySelector(".t-birth").value,
+   relation,
+   relationOther:relation==="其他"?el.querySelector(".t-rel-other").value.trim():"",
+   departDate:same?val("departDate"):el.querySelector(".t-depart").value,
+   returnDate:same?val("returnDate"):el.querySelector(".t-return").value,
+   underGuardianship:el.querySelector(".t-guard").value==="true",
+   beneficiary:{type:bt,name:bt==="指定受益人"?el.querySelector(".b-name").value.trim():"",idNumber:bt==="指定受益人"?el.querySelector(".b-id").value.trim():"",relation:bt==="指定受益人"?br:"",relationOther:bt==="指定受益人"&&br==="其他"?el.querySelector(".b-rel-other").value.trim():""}
   }
+ })
 }
 
-function collectTravelers() {
-  return [...document.querySelectorAll(".traveler")].map(el => {
-    const relation = el.querySelector(".t-relation").value;
-    const same = el.querySelector(".t-same-period").value === "true";
-    const beneficiaryType = el.querySelector(".t-beneficiary-type").value;
-    const bRelation = el.querySelector(".b-relation").value;
-
-    return {
-      name: el.querySelector(".t-name").value.trim(),
-      idNumber: el.querySelector(".t-id").value.trim(),
-      birthDate: el.querySelector(".t-birth").value,
-      relation,
-      relationOther: relation === "其他" ? el.querySelector(".t-relation-other").value.trim() : "",
-      sameTravelPeriod: same,
-      departDate: same ? val("departDate") : el.querySelector(".t-depart").value,
-      returnDate: same ? val("returnDate") : el.querySelector(".t-return").value,
-      underGuardianship: el.querySelector(".t-guardianship").value === "true",
-      beneficiary: {
-        type: beneficiaryType,
-        name: beneficiaryType === "指定受益人" ? el.querySelector(".b-name").value.trim() : "",
-        idNumber: beneficiaryType === "指定受益人" ? el.querySelector(".b-id").value.trim() : "",
-        relation: beneficiaryType === "指定受益人" ? bRelation : "",
-        relationOther: beneficiaryType === "指定受益人" && bRelation === "其他"
-          ? el.querySelector(".b-relation-other").value.trim() : ""
-      }
-    };
-  });
+function buildData(){
+ if(val("applicantIsTraveler")==="true")fillTraveler(document.querySelector(".traveler"));
+ const plan=val("travelPlan"),amountMap={"基本型":300,"豪華型":500,"尊榮型":1000};
+ return{
+  idToken,
+  insuranceSelection:{insurer:val("insurer"),travelPlan:plan,insuredAmountWan:plan==="其他"?Number(val("customAmount")||0):amountMap[plan]||0,inconveniencePlan:selectedInc()},
+  applicant:{name:val("applicantName"),idNumber:val("applicantId"),birthDate:val("applicantBirth"),phone:val("applicantPhone"),address:val("applicantAddress"),email:val("applicantEmail")},
+  trip:{destinationCountry:val("country"),departDate:val("departDate"),returnDate:val("returnDate")},
+  applicantIsTraveler:val("applicantIsTraveler")==="true",
+  travelers:travelers()
+ }
 }
 
-function validateForm(data) {
-  const missing = [];
-
-  if (!idToken) missing.push("LINE 身分尚未完成");
-  if (!data.insuranceSelection.insurer) missing.push("保險公司");
-  if (!data.insuranceSelection.travelPlan) missing.push("旅平險方案");
-  if (data.insuranceSelection.travelPlan === "其他" && !data.insuranceSelection.customInsuredAmount) missing.push("其他保額");
-
-  const a = data.applicant;
-  if (!a.name) missing.push("要保人姓名");
-  if (!a.idNumber) missing.push("要保人身分證");
-  if (!a.birthDate) missing.push("要保人出生年月日");
-  if (!a.phone) missing.push("電話");
-  if (!a.address) missing.push("地址");
-  if (!a.email) missing.push("Email");
-
-  const t = data.trip;
-  if (!t.destinationCountry) missing.push("出發國家");
-  if (!t.departDate) missing.push("出發日期");
-  if (!t.returnDate) missing.push("回程日期");
-  if (t.departDate && t.returnDate && t.returnDate < t.departDate) missing.push("回程日期不可早於出發日期");
-
-  data.travelers.forEach((x,i) => {
-    const n = i + 1;
-    if (!x.name) missing.push(`旅客 ${n} 姓名`);
-    if (!x.idNumber) missing.push(`旅客 ${n} 身分證`);
-    if (!x.birthDate) missing.push(`旅客 ${n} 出生年月日`);
-    if (x.relation === "其他" && !x.relationOther) missing.push(`旅客 ${n} 其他關係`);
-    if (!x.departDate || !x.returnDate) missing.push(`旅客 ${n} 旅遊日期`);
-    if (x.beneficiary.type === "指定受益人") {
-      if (!x.beneficiary.name) missing.push(`旅客 ${n} 受益人姓名`);
-      if (!x.beneficiary.idNumber) missing.push(`旅客 ${n} 受益人身分證`);
-      if (x.beneficiary.relation === "其他" && !x.beneficiary.relationOther) missing.push(`旅客 ${n} 受益人其他關係`);
-    }
-  });
-
-  if (missing.length) {
-    throw new Error("請確認以下欄位：\n• " + missing.join("\n• "));
-  }
+function validate(d){
+ const m=[];
+ if(!idToken)m.push("LINE 尚未連線");
+ if(!d.insuranceSelection.insurer)m.push("保險公司");
+ if(!d.insuranceSelection.travelPlan)m.push("旅平險方案");
+ if(d.insuranceSelection.travelPlan==="其他"&&!d.insuranceSelection.insuredAmountWan)m.push("其他保額");
+ const a=d.applicant;if(!a.name)m.push("要保人姓名");if(!a.idNumber)m.push("要保人身分證");if(!a.birthDate)m.push("出生年月日");if(!a.phone)m.push("電話");if(!a.address)m.push("地址");if(!a.email)m.push("Email");
+ const t=d.trip;if(!t.destinationCountry)m.push("出發國家");if(!t.departDate)m.push("出發日期");if(!t.returnDate)m.push("回程日期");if(t.departDate&&t.returnDate&&t.returnDate<t.departDate)m.push("回程日期不可早於出發日期");
+ d.travelers.forEach((x,i)=>{const n=i+1;if(!x.name)m.push(`旅客${n}姓名`);if(!x.idNumber)m.push(`旅客${n}身分證`);if(!x.birthDate)m.push(`旅客${n}生日`);if(x.relation==="其他"&&!x.relationOther)m.push(`旅客${n}其他關係`);if(!x.departDate||!x.returnDate)m.push(`旅客${n}日期`);if(x.beneficiary.type==="指定受益人"){if(!x.beneficiary.name)m.push(`旅客${n}受益人姓名`);if(!x.beneficiary.idNumber)m.push(`旅客${n}受益人身分證`);if(x.beneficiary.relation==="其他"&&!x.beneficiary.relationOther)m.push(`旅客${n}受益人其他關係`)}})
+ if(m.length)throw new Error("請確認：\n• "+m.join("\n• "));
 }
 
-function buildData() {
-  if (val("applicantIsTraveler") === "true") {
-    fillTravelerFromApplicant(document.querySelector(".traveler"));
-  }
-
-  const travelPlan = val("travelPlan");
-  const planAmounts = {"基本型":300,"豪華型":500,"尊榮型":1000};
-
-  return {
-    idToken,
-    insuranceSelection: {
-      insurer: val("insurer"),
-      travelPlan,
-      insuredAmountWan: travelPlan === "其他" ? Number(val("customAmount") || 0) : planAmounts[travelPlan] || 0,
-      customInsuredAmount: travelPlan === "其他" ? Number(val("customAmount") || 0) : null,
-      inconveniencePlan: selectedInconvenience()
-    },
-    applicant: {
-      name: val("applicantName"),
-      idNumber: val("applicantId"),
-      birthDate: val("applicantBirth"),
-      phone: val("applicantPhone"),
-      address: val("applicantAddress"),
-      email: val("applicantEmail")
-    },
-    trip: {
-      destinationCountry: val("country"),
-      departDate: val("departDate"),
-      returnDate: val("returnDate")
-    },
-    applicantIsTraveler: val("applicantIsTraveler") === "true",
-    travelers: collectTravelers()
-  };
+function submitApplication(){
+ try{
+  if(API_URL.includes("PASTE_YOUR_"))throw new Error("尚未設定 API_URL。請先把 Apps Script /exec 網址貼進 index.html。");
+  const d=buildData();validate(d);
+  if(!confirm("確認送出投保／報價資料？\n送出後將建立案件並進入待報價。"))return;
+  document.getElementById("submitBtn").disabled=true;
+  document.getElementById("submitBtn").textContent="正在送出…";
+  document.getElementById("payload").value=JSON.stringify(d);
+  const f=document.getElementById("postForm");
+  f.action=API_URL;
+  f.submit();
+ }catch(e){alert(e.message||e)}
 }
 
-function reviewApplication() {
-  try {
-    const data = buildData();
-    validateForm(data);
-
-    const s = data.insuranceSelection;
-    const summary = document.getElementById("reviewSummary");
-    summary.innerHTML = `
-      <strong>保險公司：</strong>${esc(s.insurer)}<br>
-      <strong>旅平險：</strong>${esc(s.travelPlan)}｜${esc(s.insuredAmountWan)} 萬<br>
-      <strong>旅遊不便險：</strong>${esc(s.inconveniencePlan)}<br>
-      <strong>要保人：</strong>${esc(data.applicant.name)}<br>
-      <strong>目的地：</strong>${esc(data.trip.destinationCountry)}<br>
-      <strong>期間：</strong>${esc(data.trip.departDate)} ～ ${esc(data.trip.returnDate)}<br>
-      <strong>被保險人／同行旅客：</strong>${data.travelers.length} 人
-    `;
-    document.getElementById("reviewCard").classList.remove("hidden");
-    document.getElementById("reviewCard").scrollIntoView({behavior:"smooth"});
-  } catch (e) {
-    alert(e.message || e);
-  }
-}
-
-window.addEventListener("load", () => {
-  addTraveler(true);
-  initLiff();
-});
+window.addEventListener("load",()=>{addTraveler(true);initLiff()});
 </script>
 </body>
 </html>
