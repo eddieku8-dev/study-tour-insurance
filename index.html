@@ -68,12 +68,24 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 
 <div class="card">
 <div class="step">STEP 4</div><h2>旅遊資料</h2>
-<label>旅遊國家 *</label><input id="country">
+
+<label>旅遊國家 *</label>
+<input id="country">
+
 <div class="grid2">
-<div><label>去程日期 *</label><input id="departDate" type="date"></div>
-<div><label>回程日期 *</label><input id="returnDate" type="date"></div>
+<div>
+<label>班機去程時間 *</label>
+<input id="departDateTime" type="datetime-local" onchange="updateTravelDays()">
 </div>
-<p class="note">※ 依投保時間限制，去程日期須距離填寫報價資料時間至少 144 小時。<br><strong id="minDepartureHint"></strong></p>
+<div>
+<label>班機回程時間 *</label>
+<input id="returnDateTime" type="datetime-local" onchange="updateTravelDays()">
+</div>
+</div>
+
+<label>旅遊天數</label>
+<input id="travelDaysDisplay" type="text" readonly placeholder="系統自動計算">
+
 <label>要保人是否也是被保險人／同行旅客？ *</label>
 <select id="applicantIsTraveler" onchange="syncApplicantTraveler()">
 <option value="true">是</option>
@@ -209,7 +221,7 @@ function addTraveler(fromApplicant=false){
     <input class="t-rel-other">
   </div>
 
-  <label>是否與主要行程相同日期？ *</label>
+  <label>是否與主要行程相同班機時間？ *</label>
   <select class="t-same">
     <option value="true">是</option>
     <option value="false">否</option>
@@ -218,12 +230,12 @@ function addTraveler(fromApplicant=false){
   <div class="t-date-box hidden">
     <div class="grid2">
       <div>
-        <label>個人去程日期 *</label>
-        <input class="t-depart" type="date">
+        <label>個人班機去程時間 *</label>
+        <input class="t-depart" type="datetime-local">
       </div>
       <div>
-        <label>個人回程日期 *</label>
-        <input class="t-return" type="date">
+        <label>個人班機回程時間 *</label>
+        <input class="t-return" type="datetime-local">
       </div>
     </div>
   </div>
@@ -367,6 +379,75 @@ function travelers(){
   });
 }
 
+function calculateTravelDays(){
+  const departValue=val("departDateTime");
+  const returnValue=val("returnDateTime");
+
+  if(!departValue || !returnValue){
+    return 0;
+  }
+
+  const depart=new Date(departValue);
+  const ret=new Date(returnValue);
+
+  if(isNaN(depart.getTime()) || isNaN(ret.getTime()) || ret<=depart){
+    return 0;
+  }
+
+  const hours=(ret.getTime()-depart.getTime())/(1000*60*60);
+
+  // 每 24 小時為 1 天，不足 24 小時的部分無條件進位。
+  return Math.max(1,Math.ceil(hours/24));
+}
+
+function updateTravelDays(){
+  const display=document.getElementById("travelDaysDisplay");
+  const days=calculateTravelDays();
+  display.value=days ? `${days} 天` : "";
+
+  const departValue=val("departDateTime");
+  const returnValue=val("returnDateTime");
+
+  if(departValue){
+    const depart=new Date(departValue);
+    const now=new Date();
+    const diffMs=depart.getTime()-now.getTime();
+
+    if(!isNaN(diffMs) && diffMs<(5*24*60*60*1000)){
+      alert("請聯繫專人");
+    }
+  }
+
+  if(departValue && returnValue){
+    const depart=new Date(departValue);
+    const ret=new Date(returnValue);
+
+    if(!isNaN(depart.getTime()) && !isNaN(ret.getTime()) && ret<=depart){
+      alert("班機回程時間必須晚於班機去程時間");
+      display.value="";
+    }
+  }
+}
+
+function validateDepartureFiveDays(){
+  const departValue=val("departDateTime");
+  if(!departValue) return false;
+
+  const depart=new Date(departValue);
+  const now=new Date();
+
+  if(isNaN(depart.getTime())) return false;
+
+  const diffMs=depart.getTime()-now.getTime();
+
+  if(diffMs<(5*24*60*60*1000)){
+    alert("請聯繫專人");
+    return false;
+  }
+
+  return true;
+}
+
 function buildData(){
   if(val("applicantIsTraveler")==="true"){
     fillTraveler(document.querySelector(".traveler"));
@@ -400,8 +481,9 @@ function buildData(){
     },
     trip:{
       travelCountry:val("country"),
-      departDate:val("departDate"),
-      returnDate:val("returnDate")
+      departDateTime:val("departDateTime"),
+      returnDateTime:val("returnDateTime"),
+      travelDays:calculateTravelDays()
     },
     applicantIsTraveler:
       val("applicantIsTraveler")==="true",
@@ -435,23 +517,19 @@ function validate(d){
   const t=d.trip;
 
   if(!t.travelCountry)m.push("旅遊國家");
-  if(!t.departDate)m.push("去程日期");
-  if(!t.returnDate)m.push("回程日期");
+  if(!t.departDateTime)m.push("班機去程時間");
+  if(!t.returnDateTime)m.push("班機回程時間");
 
-  if(t.departDate){
-    const minDepart=getMinDepartureDate();
-    if(t.departDate<minDepart){
-      m.push("去程日期須距離填寫報價時間至少 144 小時");
+  if(t.departDateTime && t.returnDateTime){
+    const depart=new Date(t.departDateTime);
+    const ret=new Date(t.returnDateTime);
+
+    if(ret<=depart){
+      m.push("班機回程時間必須晚於班機去程時間");
     }
   }
 
-  if(
-    t.departDate &&
-    t.returnDate &&
-    t.returnDate<t.departDate
-  ){
-    m.push("回程日期不可早於去程日期");
-  }
+  if(!t.travelDays)m.push("旅遊天數");
 
   d.travelers.forEach((x,i)=>{
     const n=i+1;
@@ -497,52 +575,6 @@ function validate(d){
 }
 
 
-function getMinDepartureDate(){
-  const now=new Date();
-  const minTime=new Date(now.getTime()+144*60*60*1000);
-
-  // 因表單只收日期、不收去程時間，為確保整個去程日期
-  // 不會落在 144 小時限制內，將可選日期向上取整到下一個本地日。
-  const y=minTime.getFullYear();
-  const m=String(minTime.getMonth()+1).padStart(2,"0");
-  const d=String(minTime.getDate()).padStart(2,"0");
-
-  // 如果 144 小時後不是當天 00:00，則下一天才是整日安全可選。
-  const hasTime=
-    minTime.getHours()!==0 ||
-    minTime.getMinutes()!==0 ||
-    minTime.getSeconds()!==0 ||
-    minTime.getMilliseconds()!==0;
-
-  const safeDate=new Date(y+"-"+m+"-"+d+"T00:00:00");
-  if(hasTime){
-    safeDate.setDate(safeDate.getDate()+1);
-  }
-
-  return [
-    safeDate.getFullYear(),
-    String(safeDate.getMonth()+1).padStart(2,"0"),
-    String(safeDate.getDate()).padStart(2,"0")
-  ].join("-");
-}
-
-function applyDepartureDateLimit(){
-  const depart=document.getElementById("departDate");
-  if(!depart)return;
-
-  const minDate=getMinDepartureDate();
-  depart.min=minDate;
-
-  const hint=document.getElementById("minDepartureHint");
-  if(hint){
-    hint.textContent="目前最早可選去程日期："+minDate;
-  }
-
-  if(depart.value && depart.value<minDate){
-    depart.value="";
-  }
-}
-
 function submitApplication(){
   const btn=document.getElementById("submitBtn");
 
@@ -553,6 +585,10 @@ function submitApplication(){
 
     const d=buildData();
     validate(d);
+
+    if(!validateDepartureFiveDays()){
+      return;
+    }
 
     if(
       !confirm(
@@ -581,7 +617,6 @@ function submitApplication(){
 
 window.addEventListener("load",()=>{
   addTraveler(true);
-  applyDepartureDateLimit();
   initLiff();
 });
 </script>
