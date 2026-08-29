@@ -30,7 +30,7 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 </head>
 <body>
 <div class="wrap">
-<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫｜v7.2</p></div>
+<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫｜v7.3</p></div>
 
 <div class="card"><h2>LINE 連線</h2><div id="lineStatus">正在確認 LINE 身分…</div></div>
 
@@ -91,6 +91,7 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 
 <label>要保人是否也是被保險人／同行旅客？ *</label>
 <select id="applicantIsTraveler" onchange="syncApplicantTraveler()">
+<option value="">－</option>
 <option value="true">是</option>
 <option value="false">否</option>
 </select>
@@ -118,14 +119,14 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 
 <script>
 const LIFF_ID = "2011319653-aVI0Ar9E";
-const BUILD_VERSION = "v7.2-line-safe";
+const BUILD_VERSION = "v7.3-line-safe";
 
 /* ★ 換成你的 Apps Script /exec 網址 */
 const API_URL = "https://script.google.com/macros/s/AKfycbxzRfLG6HS_2exhi9v43gxOvVmIjYR8y59c4ptmXup7XyNOT_lnrWZPuDGlyZJ6bmfXuw/exec";
 
 let idToken = "";
 let travelerSeq = 0;
-const relations = ["本人","父母","子女","兄弟姊妹","其他"];
+const relations = ["本人","配偶","父母","子女","兄弟姊妹","其他"];
 
 function getEl(id){
   const el=document.getElementById(id);
@@ -351,19 +352,32 @@ function fillTraveler(el){
 }
 
 function syncApplicantTraveler(){
-  const e=document.querySelector(".traveler");
+  const firstTraveler=document.querySelector(".traveler");
+  if(!firstTraveler)return;
 
-  if(!e)return;
+  const choice=val("applicantIsTraveler");
 
-  if(val("applicantIsTraveler")==="true"){
-    fillTraveler(e);
-  }else{
-    e.querySelector(".t-name").value="";
-    e.querySelector(".t-id").value="";
-    e.querySelector(".t-birth").value="";
-    e.querySelector(".t-rel").value="其他";
-    e.querySelector(".t-rel-other-box").classList.remove("hidden");
+  if(choice==="true"){
+    fillTraveler(firstTraveler);
+    return;
   }
+
+  if(choice==="false"){
+    q(firstTraveler,".t-name","旅客姓名").value="";
+    q(firstTraveler,".t-id","旅客身分證").value="";
+    q(firstTraveler,".t-birth","旅客生日").value="";
+
+    const relation=q(firstTraveler,".t-rel","旅客關係");
+    relation.value="其他";
+    q(firstTraveler,".t-rel-other-box","旅客其他關係區塊")
+      .classList.remove("hidden");
+    return;
+  }
+
+  // 預設「－」時，不自動帶入要保人資料。
+  q(firstTraveler,".t-name","旅客姓名").value="";
+  q(firstTraveler,".t-id","旅客身分證").value="";
+  q(firstTraveler,".t-birth","旅客生日").value="";
 }
 
 function travelers(){
@@ -468,16 +482,22 @@ function updateTravelDays(){
 
 function validateDepartureFiveDays(){
   const departValue=val("departDateTime");
-  if(!departValue) return false;
+
+  if(!departValue){
+    return false;
+  }
 
   const depart=new Date(departValue);
   const now=new Date();
 
-  if(isNaN(depart.getTime())) return false;
+  if(isNaN(depart.getTime())){
+    return false;
+  }
 
   const diffMs=depart.getTime()-now.getTime();
 
-  if(diffMs<(5*24*60*60*1000)){
+  // 去程班機時間距現在少於 5 天時，只在最後送出表單時提示。
+  if(diffMs < (5*24*60*60*1000)){
     alert("請聯繫專人");
     return false;
   }
@@ -550,6 +570,10 @@ function validate(d){
   if(!a.phone)m.push("電話");
   if(!a.address)m.push("地址");
   if(!a.email)m.push("Email");
+
+  if(!val("applicantIsTraveler")){
+    m.push("要保人是否也是被保險人／同行旅客");
+  }
 
   const t=d.trip;
 
@@ -666,7 +690,19 @@ window.addEventListener("unhandledrejection",(event)=>{
 });
 
 window.addEventListener("load",()=>{
-  addTraveler(true);
+  addTraveler(false);
+
+  ["applicantName","applicantId","applicantBirth"].forEach(id=>{
+    getEl(id).addEventListener("input",()=>{
+      if(val("applicantIsTraveler")==="true"){
+        const firstTraveler=document.querySelector(".traveler");
+        if(firstTraveler){
+          fillTraveler(firstTraveler);
+        }
+      }
+    });
+  });
+
   initLiff();
 });
 </script>
