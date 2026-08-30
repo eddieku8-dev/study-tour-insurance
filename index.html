@@ -25,14 +25,35 @@ input,select{width:100%;padding:12px;border:1px solid #cfd5dc;border-radius:10px
 .notice{background:#f3f7ff;padding:12px;border-radius:10px;font-size:13px;line-height:1.55}
 button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:pointer}.primary{width:100%;background:#111;color:#fff;font-weight:700}.secondary{background:#edf0f4}.delete{background:#fff0f0;color:#a52828;padding:8px 10px;font-size:13px}
 .ok{color:#137333}.bad{color:#c5221f}
+.recommend-card{border:1px solid #cfe7dd;background:linear-gradient(135deg,#ffffff,#f2fbf7)}
+.recommend-badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#e8f7f1;color:#17745e;font-size:12px;font-weight:800;margin-bottom:7px}
+.recommend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.recommend-item{border:1px solid #dfe9e5;background:#fff;border-radius:12px;padding:10px;text-align:center}
+.recommend-item span{display:block;font-size:12px;color:#66717f}
+.recommend-item b{display:block;font-size:18px;margin-top:2px}
+@media(max-width:560px){.recommend-grid{grid-template-columns:1fr 1fr}.recommend-item:last-child{grid-column:1/-1}}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫｜v7.4</p></div>
+<div class="hero"><h1>🌏 遊學團旅平險</h1><p>方案選擇與投保資料填寫｜v7.5</p></div>
 
 <div class="card"><h2>LINE 連線</h2><div id="lineStatus">正在確認 LINE 身分…</div></div>
+
+<div id="recommendationCard" class="card recommend-card hidden">
+  <div class="recommend-badge">⭐ 推薦方案已帶入</div>
+  <h2 id="recommendationTitle">推薦方案</h2>
+  <div id="recommendationReason" class="note"></div>
+  <div class="recommend-grid">
+    <div class="recommend-item"><span>旅行平安險</span><b id="recDeath">－</b></div>
+    <div class="recommend-item"><span>意外傷害醫療</span><b id="recAccident">－</b></div>
+    <div class="recommend-item"><span>海外突發疾病</span><b id="recIllness">－</b></div>
+  </div>
+  <div class="notice">
+    已替您帶入推薦的保險公司與方案。若有特殊需求仍可自行調整；實際保費與承保內容以保險公司核保結果為準。
+  </div>
+</div>
 
 <div class="card">
 <div class="step">STEP 1</div><h2>選擇旅平險方案</h2>
@@ -122,7 +143,7 @@ button{border:0;border-radius:11px;padding:12px 15px;font-size:16px;cursor:point
 
 <script>
 const LIFF_ID = "2011319653-aVI0Ar9E";
-const BUILD_VERSION = "v7.4-shared-trip";
+const BUILD_VERSION = "v7.5-recommend-link";
 
 /* ★ 換成你的 Apps Script /exec 網址 */
 const API_URL = "https://script.google.com/macros/s/AKfycbxzRfLG6HS_2exhi9v43gxOvVmIjYR8y59c4ptmXup7XyNOT_lnrWZPuDGlyZJ6bmfXuw/exec";
@@ -130,6 +151,17 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxzRfLG6HS_2exhi9v43gxO
 let idToken = "";
 let travelerSeq = 0;
 const relations = ["本人","配偶","父母","子女","兄弟姊妹","其他"];
+
+let recommendationContext = {
+  source:"",
+  tier:"",
+  tierLabel:"",
+  deathWan:0,
+  accidentMedicalWan:0,
+  illnessWan:0,
+  destinationGroup:"",
+  insurerCode:""
+};
 
 function getEl(id){
   const el=document.getElementById(id);
@@ -157,6 +189,99 @@ function qval(el,selector,label){
   return String(found.value??"").trim();
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+
+function destinationGroupLabel(code){
+  return {
+    general:"一般海外",
+    jpkr:"日本／韓國",
+    usca:"美國／加拿大",
+    europe:"歐洲／申根"
+  }[code] || "";
+}
+
+function insurerNameFromCode(code){
+  return {
+    chubb:"安達產險",
+    fubon:"富邦產險",
+    shinkong:"新光產險"
+  }[code] || "";
+}
+
+function recommendedInconvenience(insurerCode,tier){
+  if(insurerCode==="chubb"){
+    return tier==="premium" ? "尊榮型" : "超值型";
+  }
+  if(insurerCode==="shinkong"){
+    return tier==="premium" ? "豪華型" : "標準型";
+  }
+  if(insurerCode==="fubon"){
+    return "已包含不便險";
+  }
+  return "";
+}
+
+function setRadioValue(name,value){
+  if(!value)return;
+  const radio=[...document.querySelectorAll(`input[name="${name}"]`)]
+    .find(x=>x.value===value);
+  if(radio){
+    radio.checked=true;
+  }
+}
+
+function applyRecommendationFromUrl(){
+  const p=new URLSearchParams(window.location.search);
+
+  if(p.get("from")!=="recommend"){
+    return;
+  }
+
+  const insurerCode=String(p.get("insurer")||"").toLowerCase();
+  const tier=String(p.get("tier")||"").toLowerCase();
+  const insurerName=insurerNameFromCode(insurerCode);
+
+  if(!insurerName || !["standard","premium"].includes(tier)){
+    return;
+  }
+
+  const defaultDeath=tier==="premium" ? 500 : 300;
+  const defaultMedical=tier==="premium" ? 50 : 30;
+
+  recommendationContext={
+    source:"recommend",
+    tier,
+    tierLabel:tier==="premium" ? "豪華型" : "標準型",
+    deathWan:Number(p.get("death")||defaultDeath),
+    accidentMedicalWan:Number(p.get("accidentMedical")||defaultMedical),
+    illnessWan:Number(p.get("illness")||defaultMedical),
+    destinationGroup:destinationGroupLabel(p.get("destination")||""),
+    insurerCode
+  };
+
+  getEl("insurer").value=insurerName;
+  getEl("travelPlan").value=tier==="premium" ? "豪華型" : "基本型";
+
+  toggleCustomAmount();
+  renderInconvenience();
+  setRadioValue(
+    "inconvenience",
+    recommendedInconvenience(insurerCode,tier)
+  );
+
+  getEl("recommendationCard").classList.remove("hidden");
+  getEl("recommendationTitle").textContent=
+    `${insurerName}｜${recommendationContext.tierLabel}`;
+
+  const destinationText=recommendationContext.destinationGroup
+    ? `推薦時選擇的地區：${recommendationContext.destinationGroup}`
+    : "已從推薦方案頁進入";
+
+  getEl("recommendationReason").textContent=destinationText;
+  getEl("recDeath").textContent=`${recommendationContext.deathWan} 萬`;
+  getEl("recAccident").textContent=`${recommendationContext.accidentMedicalWan} 萬`;
+  getEl("recIllness").textContent=`${recommendationContext.illnessWan} 萬`;
+}
 
 async function initLiff(){
   try{
@@ -498,6 +623,15 @@ function buildData(){
           :amountMap[plan]||0,
       inconveniencePlan:selectedInc()
     },
+    recommendation:{
+      source:recommendationContext.source,
+      tier:recommendationContext.tier,
+      tierLabel:recommendationContext.tierLabel,
+      deathWan:recommendationContext.deathWan,
+      accidentMedicalWan:recommendationContext.accidentMedicalWan,
+      illnessWan:recommendationContext.illnessWan,
+      destinationGroup:recommendationContext.destinationGroup
+    },
     applicant:{
       name:val("applicantName"),
       idNumber:val("applicantId"),
@@ -657,6 +791,7 @@ window.addEventListener("unhandledrejection",(event)=>{
 
 window.addEventListener("load",()=>{
   addTraveler(false);
+  applyRecommendationFromUrl();
 
   ["applicantName","applicantId","applicantBirth"].forEach(id=>{
     getEl(id).addEventListener("input",()=>{
