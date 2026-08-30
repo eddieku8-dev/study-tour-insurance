@@ -71,15 +71,15 @@
     <div id="alternative" class="alternative"></div>
   </section>
 
-  <div class="footer">RECOMMENDATION · v8.6<br>※ 標準型／豪華型為本平台方便比較所使用的推薦分類，並非各保險公司正式商品名稱。<br>※ 實際承保內容、保費、核保條件及理賠仍依各保險公司正式保單條款與核保結果為準。</div>
+  <div class="footer">RECOMMENDATION · v8.6.1<br>※ 標準型／豪華型為本平台方便比較所使用的推薦分類，並非各保險公司正式商品名稱。<br>※ 實際承保內容、保費、核保條件及理賠仍依各保險公司正式保單條款與核保結果為準。</div>
 </main>
 <script>
 (()=>{
 const state={destination:"",priority:"",tier:""};const $=id=>document.getElementById(id);
 const DM_URLS={
-  chubb:"https://eddieku8-dev.github.io/study-tour-insurance/docs/chubb-travel-insurance.pdf",
-  fubon:"https://eddieku8-dev.github.io/study-tour-insurance/docs/fubon-travel-insurance.pdf",
-  shinkong:"https://eddieku8-dev.github.io/study-tour-insurance/docs/shinkong-travel-insurance.pdf"
+  chubb:"./official-dm.html?insurer=chubb",
+  fubon:"./official-dm.html?insurer=fubon",
+  shinkong:"./official-dm.html?insurer=shinkong"
 };
 function sel(group,value,el){state[group]=value;const selector=group==="tier"?'[data-group="tier"] .tier-card, .auto':`[data-group="${group}"] .option`;document.querySelectorAll(selector).forEach(x=>x.classList.remove("selected"));el.classList.add("selected");if(group==="destination")$("next1").disabled=false;if(group==="priority")$("next2").disabled=false;if(group==="tier")$("showResult").disabled=false}
 document.querySelectorAll('[data-group="destination"] .option').forEach(b=>b.addEventListener("click",()=>sel("destination",b.dataset.value,b)));
